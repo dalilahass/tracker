@@ -2,7 +2,7 @@
   "name": "Mon Cerveau — Tracker",
   "short_name": "Mon Cerveau",
   "description": "Tracker quotidien TDAH/TSA",
-  "start_url": "/",
+  "start_url": "/tracker/",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
