@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Cerveau">
+<title>Mon Cerveau — Tracker quotidien</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --bg3: #242424;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #f0ede8;
+  --text2: #888580;
+  --text3: #555250;
+  --teal: #5DCAA5;
+  --teal-dim: rgba(93,202,165,0.15);
+  --coral: #F0997B;
+  --coral-dim: rgba(240,153,123,0.15);
+  --purple: #9F97DD;
+  --purple-dim: rgba(159,151,221,0.15);
+  --amber: #EF9F27;
+  --amber-dim: rgba(239,159,39,0.15);
+  --pink: #D4537E;
+  --pink-dim: rgba(212,83,126,0.15);
+  --blue: #85B7EB;
+  --blue-dim: rgba(133,183,235,0.15);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; overscroll-behavior: none; }
+body { display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+/* Nav */
+.nav { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border: none; background: none; color: var(--text3); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.05em; transition: color 0.15s; }
+.nav-btn.active { color: var(--teal); }
+.nav-icon { font-size: 20px; line-height: 1; }
+
+/* Scroll area */
+.page { flex: 1; overflow-y: auto; padding: 1.25rem 1rem 6rem; display: none; }
+.page.active { display: block; }
+
+/* Section */
+.section-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); font-weight: 500; margin: 1.5rem 0 0.75rem; }
+.section-label:first-child { margin-top: 0; }
+
+/* Cards */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 10px; }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.card-label { font-size: 11px; color: var(--text2); margin-bottom: 10px; }
+.card-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--text); }
+
+/* Sliders */
+.slider-row { display: flex; align-items: center; gap: 10px; }
+.slider-num { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; min-width: 24px; text-align: right; color: var(--teal); }
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; height: 3px; border-radius: 99px; background: var(--bg3); outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--teal); cursor: pointer; box-shadow: 0 0 0 4px rgba(93,202,165,0.15); }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.pill { padding: 5px 12px; border-radius: 99px; font-size: 12px; border: 1px solid var(--border); background: var(--bg2); color: var(--text2); cursor: pointer; transition: all 0.15s; user-select: none; }
+.pill.on-teal { background: var(--teal-dim); color: var(--teal); border-color: rgba(93,202,165,0.3); }
+.pill.on-coral { background: var(--coral-dim); color: var(--coral); border-color: rgba(240,153,123,0.3); }
+.pill.on-purple { background: var(--purple-dim); color: var(--purple); border-color: rgba(159,151,221,0.3); }
+.pill.on-amber { background: var(--amber-dim); color: var(--amber); border-color: rgba(239,159,39,0.3); }
+.pill.on-pink { background: var(--pink-dim); color: var(--pink); border-color: rgba(212,83,126,0.3); }
+.pill.on-blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(133,183,235,0.3); }
+
+/* Checkboxes */
+.cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.cb-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg2); cursor: pointer; font-size: 12px; color: var(--text2); transition: all 0.15s; user-select: none; }
+.cb-item.checked { background: var(--teal-dim); color: var(--teal); border-color: rgba(93,202,165,0.3); }
+.cb-check { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.cb-item.checked .cb-check { background: var(--teal); border-color: var(--teal); }
+.cb-check::after { content: '✓'; font-size: 9px; color: #000; opacity: 0; transition: opacity 0.1s; }
+.cb-item.checked .cb-check::after { opacity: 1; }
+
+/* Textarea */
+textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 12px; resize: none; outline: none; min-height: 80px; line-height: 1.6; }
+textarea::placeholder { color: var(--text3); }
+textarea:focus { border-color: var(--border2); }
+
+/* Save button */
+.save-btn { width: 100%; padding: 14px; border-radius: var(--radius); background: var(--teal); color: #000; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; border: none; cursor: pointer; margin-top: 1.25rem; transition: opacity 0.15s; }
+.save-btn:active { opacity: 0.8; }
+.save-feedback { text-align: center; font-size: 12px; color: var(--teal); height: 20px; margin-top: 8px; }
+
+/* History */
+.entry { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 10px; }
+.entry-date { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.entry-bars { display: flex; gap: 6px; align-items: flex-end; margin-bottom: 8px; }
+.bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bar { width: 24px; border-radius: 3px; transition: height 0.3s; }
+.bar-lbl { font-size: 9px; color: var(--text3); }
+.entry-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.entry-pill { font-size: 10px; padding: 2px 8px; border-radius: 99px; background: var(--bg3); color: var(--text2); }
+.entry-note { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 8px; line-height: 1.5; }
+
+/* Trends */
+.trend-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 10px; }
+.trend-title { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+.chart-wrap { position: relative; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; }
+.stat-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+.stat-val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; }
+
+/* Empty */
+.empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 13px; line-height: 1.7; }
+
+/* Header */
+.header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.25rem; }
+.header-title { font-size: 20px; font-weight: 500; }
+.header-date { font-size: 12px; color: var(--text3); }
+
+/* Day indicator */
+.day-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; background: var(--teal-dim); color: var(--teal); font-size: 11px; margin-bottom: 1.25rem; }
+.day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('today', this)">
+    <span class="nav-icon">◉</span>
+    <span>Aujourd'hui</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('history', this)">
+    <span class="nav-icon">≡</span>
+    <span>Historique</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('trends', this)">
+    <span class="nav-icon">∿</span>
+    <span>Tendances</span>
+  </button>
+</nav>
+
+<!-- TODAY -->
+<div id="page-today" class="page active">
+  <div class="header">
+    <div class="header-title">Mon cerveau</div>
+    <div class="header-date" id="today-label"></div>
+  </div>
+
+  <div class="section-label">Énergie & humeur</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Énergie</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="5" id="s-energie" oninput="upd('energie')">
+        <span class="slider-num" id="v-energie">5</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Humeur</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="5" id="s-humeur" oninput="upd('humeur')">
+        <span class="slider-num" id="v-humeur">5</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Anxiété</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="3" id="s-anxiete" oninput="upd('anxiete')">
+        <span class="slider-num" id="v-anxiete">3</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Concentration</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="5" id="s-concentration" oninput="upd('concentration')">
+        <span class="slider-num" id="v-concentration">5</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Impulsivité</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="3" id="s-impulsivite" oninput="upd('impulsivite')">
+        <span class="slider-num" id="v-impulsivite">3</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Sensibilité émotionnelle</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="5" id="s-sensibilite" oninput="upd('sensibilite')">
+        <span class="slider-num" id="v-sensibilite">5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Sommeil</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Heures de sommeil</div>
+      <div class="slider-row">
+        <input type="range" min="3" max="13" step="0.5" value="8" id="s-sommeil" oninput="upd('sommeil')">
+        <span class="slider-num" id="v-sommeil">8</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Qualité du sommeil</div>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="6" id="s-qualite" oninput="upd('qualite')">
+        <span class="slider-num" id="v-qualite">6</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Ritaline</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Dose (mg)</div>
+      <div class="slider-row">
+        <input type="range" min="0" max="40" step="5" value="10" id="s-dose" oninput="upd('dose')">
+        <span class="slider-num" id="v-dose">10</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Effet ressenti</div>
+      <div class="slider-row">
+        <input type="range" min="0" max="10" value="5" id="s-effet" oninput="upd('effet')">
+        <span class="slider-num" id="v-effet">5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">État émotionnel</div>
+  <div class="pills" id="emotions-pills">
+    <span class="pill" data-c="teal" onclick="togglePill(this)">Paix intérieure</span>
+    <span class="pill" data-c="teal" onclick="togglePill(this)">Joie</span>
+    <span class="pill" data-c="coral" onclick="togglePill(this)">Tristesse</span>
+    <span class="pill" data-c="amber" onclick="togglePill(this)">Colère</span>
+    <span class="pill" data-c="pink" onclick="togglePill(this)">Manque affectif</span>
+    <span class="pill" data-c="coral" onclick="togglePill(this)">Anxiété</span>
+    <span class="pill" data-c="purple" onclick="togglePill(this)">Motivation</span>
+    <span class="pill" data-c="blue" onclick="togglePill(this)">Clarté mentale</span>
+    <span class="pill" data-c="amber" onclick="togglePill(this)">Brouillard mental</span>
+    <span class="pill" data-c="pink" onclick="togglePill(this)">Rejet ressenti</span>
+    <span class="pill" data-c="coral" onclick="togglePill(this)">Overwhelm</span>
+    <span class="pill" data-c="teal" onclick="togglePill(this)">Créativité</span>
+    <span class="pill" data-c="purple" onclick="togglePill(this)">Nostalgie</span>
+    <span class="pill" data-c="blue" onclick="togglePill(this)">Sérénité</span>
+  </div>
+
+  <div class="section-label">Symptômes physiques</div>
+  <div class="cb-grid" id="symptomes-grid">
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Brûlures d'estomac</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Maux de tête</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Sensation de froid</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Gorge nouée</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Ventre noué</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Fatigue des yeux</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Réveil nocturne</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Poussée d'acné</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Douleurs menstruelles</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Malaise général</div>
+  </div>
+
+  <div class="section-label">Comportements</div>
+  <div class="cb-grid" id="comportements-grid">
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Achat impulsif</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Alcool</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Sport fait</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Méditation</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Guitare</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Rumination intense</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Socialisation</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Isolement voulu</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Bonne productivité</div>
+    <div class="cb-item" onclick="toggleCb(this)"><span class="cb-check"></span>Procrastination</div>
+  </div>
+
+  <div class="section-label">Cycle menstruel</div>
+  <div class="pills" id="cycle-pills">
+    <span class="pill" data-c="coral" onclick="togglePill(this)">Règles</span>
+    <span class="pill" data-c="teal" onclick="togglePill(this)">Ovulation</span>
+    <span class="pill" data-c="purple" onclick="togglePill(this)">Phase folliculaire</span>
+    <span class="pill" data-c="blue" onclick="togglePill(this)">Phase lutéale</span>
+    <span class="pill" data-c="amber" onclick="togglePill(this)">SPM</span>
+  </div>
+
+  <div class="section-label">Moment vivant du jour</div>
+  <textarea id="note-vivant" placeholder="Un moment où j'ai ressenti quelque chose de vrai aujourd'hui…" rows="3"></textarea>
+
+  <div class="section-label">Déclencheurs / observations</div>
+  <textarea id="note-obs" placeholder="Ce qui m'a mis dans cet état, ce que j'ai remarqué sur moi…" rows="3"></textarea>
+
+  <button class="save-btn" onclick="saveToday()">Enregistrer cette journée</button>
+  <div class="save-feedback" id="save-fb"></div>
+</div>
+
+<!-- HISTORY -->
+<div id="page-history" class="page">
+  <div class="header">
+    <div class="header-title">Historique</div>
+  </div>
+  <div id="history-content"></div>
+</div>
+
+<!-- TRENDS -->
+<div id="page-trends" class="page">
+  <div class="header">
+    <div class="header-title">Tendances</div>
+  </div>
+  <div id="trends-content"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const KEY = 'braintracker_v2';
+let records = JSON.parse(localStorage.getItem(KEY) || '[]');
+
+function save() { localStorage.setItem(KEY, JSON.stringify(records)); }
+
+const months = ['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+const days = ['dim','lun','mar','mer','jeu','ven','sam'];
+
+function fmtDate(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+}
+
+document.getElementById('today-label').textContent = fmtDate(new Date().toISOString().split('T')[0]);
+
+function upd(id) {
+  document.getElementById('v-' + id).textContent = document.getElementById('s-' + id).value;
+}
+
+function togglePill(el) {
+  const c = el.dataset.c;
+  const cls = 'on-' + c;
+  el.classList.toggle(cls);
+}
+
+function toggleCb(el) { el.classList.toggle('checked'); }
+
+function getSlider(id) { return parseFloat(document.getElementById('s-' + id).value); }
+
+function getChecked(gridId) {
+  return Array.from(document.querySelectorAll('#' + gridId + ' .cb-item.checked'))
+    .map(el => el.textContent.trim());
+}
+
+function getActivePills(containerId) {
+  return Array.from(document.querySelectorAll('#' + containerId + ' .pill[class*="on-"]'))
+    .map(el => el.textContent.trim());
+}
+
+function saveToday() {
+  const today = new Date().toISOString().split('T')[0];
+  const entry = {
+    date: today,
+    energie: getSlider('energie'),
+    humeur: getSlider('humeur'),
+    anxiete: getSlider('anxiete'),
+    concentration: getSlider('concentration'),
+    impulsivite: getSlider('impulsivite'),
+    sensibilite: getSlider('sensibilite'),
+    sommeil: getSlider('sommeil'),
+    qualite: getSlider('qualite'),
+    dose: getSlider('dose'),
+    effet: getSlider('effet'),
+    emotions: getActivePills('emotions-pills'),
+    symptomes: getChecked('symptomes-grid'),
+    comportements: getChecked('comportements-grid'),
+    cycle: getActivePills('cycle-pills'),
+    note_vivant: document.getElementById('note-vivant').value,
+    note_obs: document.getElementById('note-obs').value,
+  };
+  const idx = records.findIndex(r => r.date === today);
+  if (idx >= 0) records[idx] = entry; else records.unshift(entry);
+  records.sort((a, b) => b.date.localeCompare(a.date));
+  save();
+  const fb = document.getElementById('save-fb');
+  fb.textContent = '✓ Journée enregistrée';
+  setTimeout(() => fb.textContent = '', 2500);
+}
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'history') renderHistory();
+  if (id === 'trends') renderTrends();
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-content');
+  if (!records.length) {
+    el.innerHTML = '<div class="empty">Aucune journée enregistrée.<br>Commence par remplir l\'onglet aujourd\'hui.</div>';
+    return;
+  }
+  const barColors = { energie: '#5DCAA5', humeur: '#9F97DD', anxiete: '#F0997B', concentration: '#85B7EB' };
+  const barKeys = ['energie', 'humeur', 'anxiete', 'concentration'];
+  const barLabels = ['én', 'hu', 'an', 'co'];
+  el.innerHTML = records.slice(0, 60).map(r => {
+    const bars = barKeys.map((k, i) => {
+      const h = Math.round((r[k] || 0) / 10 * 48);
+      return `<div class="bar-wrap"><div class="bar" style="height:${h}px;background:${barColors[k]}"></div><div class="bar-lbl">${barLabels[i]}</div></div>`;
+    }).join('');
+    const pills = [...(r.emotions || []).slice(0, 4), ...(r.comportements || []).filter(c => ['Achat impulsif', 'Alcool', 'Sport fait'].includes(c))]
+      .map(e => `<span class="entry-pill">${e}</span>`).join('');
+    const note = r.note_vivant ? `<div class="entry-note">"${r.note_vivant.slice(0, 100)}${r.note_vivant.length > 100 ? '…' : ''}"</div>` : '';
+    return `<div class="entry">
+      <div class="entry-date">${fmtDate(r.date)} · Ritaline ${r.dose}mg</div>
+      <div class="entry-bars">${bars}</div>
+      ${pills ? `<div class="entry-pills">${pills}</div>` : ''}
+      ${note}
+    </div>`;
+  }).join('');
+}
+
+let charts = {};
+function renderTrends() {
+  const el = document.getElementById('trends-content');
+  if (records.length < 2) {
+    el.innerHTML = '<div class="empty">Enregistre au moins 2 journées pour voir tes tendances apparaître.</div>';
+    return;
+  }
+  const last = records.slice(0, 21).reverse();
+  const labels = last.map(r => fmtDate(r.date).split(' ').slice(0, 2).join(' '));
+
+  const avg = key => {
+    const vals = records.map(r => r[key]).filter(v => v !== undefined);
+    return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
+  };
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Humeur moy.</div><div class="stat-val" style="color:var(--purple)">${avg('humeur')}</div></div>
+      <div class="stat-card"><div class="stat-label">Énergie moy.</div><div class="stat-val" style="color:var(--teal)">${avg('energie')}</div></div>
+      <div class="stat-card"><div class="stat-label">Anxiété moy.</div><div class="stat-val" style="color:var(--coral)">${avg('anxiete')}</div></div>
+      <div class="stat-card"><div class="stat-label">Sommeil moy.</div><div class="stat-val" style="color:var(--blue)">${avg('sommeil')}h</div></div>
+    </div>
+
+    <div class="trend-card">
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#5DCAA5"></span>Énergie</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#9F97DD"></span>Humeur</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#F0997B"></span>Anxiété</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#85B7EB"></span>Concentration</span>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chart-main" role="img" aria-label="Tendances humeur énergie anxiété concentration"></canvas></div>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">Sommeil & Ritaline</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#85B7EB"></span>Heures de sommeil</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Effet Ritaline</span>
+      </div>
+      <div class="chart-wrap" style="height:160px"><canvas id="chart-sleep" role="img" aria-label="Sommeil et effet Ritaline"></canvas></div>
+    </div>
+  `;
+
+  if (charts.main) { charts.main.destroy(); }
+  if (charts.sleep) { charts.sleep.destroy(); }
+
+  const baseOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { font: { size: 10 }, color: '#555250', maxRotation: 45, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false } },
+      y: { min: 0, max: 10, ticks: { font: { size: 10 }, color: '#555250' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+    }
+  };
+
+  charts.main = new Chart(document.getElementById('chart-main'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Énergie', data: last.map(r => r.energie), borderColor: '#5DCAA5', backgroundColor: 'rgba(93,202,165,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 2 },
+        { label: 'Humeur', data: last.map(r => r.humeur), borderColor: '#9F97DD', backgroundColor: 'rgba(159,151,221,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 2 },
+        { label: 'Anxiété', data: last.map(r => r.anxiete), borderColor: '#F0997B', backgroundColor: 'rgba(240,153,123,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 2 },
+        { label: 'Concentration', data: last.map(r => r.concentration), borderColor: '#85B7EB', backgroundColor: 'rgba(133,183,235,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      ]
+    },
+    options: baseOpts
+  });
+
+  charts.sleep = new Chart(document.getElementById('chart-sleep'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Sommeil', data: last.map(r => r.sommeil), borderColor: '#85B7EB', tension: 0.4, pointRadius: 2, borderWidth: 2, yAxisID: 'y' },
+        { label: 'Effet Ritaline', data: last.map(r => r.effet), borderColor: '#EF9F27', tension: 0.4, pointRadius: 2, borderWidth: 2, borderDash: [4, 3], yAxisID: 'y' },
+      ]
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: baseOpts.scales.x,
+        y: { min: 0, max: 13, ticks: { font: { size: 10 }, color: '#555250' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
